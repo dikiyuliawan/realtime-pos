@@ -7,7 +7,7 @@ type createClientOptions = {
 
 export async function createServerClient({
   isAdmin = false,
-}: createClientOptions) {
+}: createClientOptions = {}) {
   const cookieStore = await cookies();
   return createSupabaseServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

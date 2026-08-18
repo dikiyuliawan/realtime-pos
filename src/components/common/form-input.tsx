@@ -31,12 +31,17 @@ export default function FormInput<T extends FieldValues>({
           <FormLabel>{label}</FormLabel>
           <FormControl>
             {type === "textarea" ? (
-              <Textarea placeholder={placeholder} {...field} />
+              <Textarea
+                placeholder={placeholder}
+                className="resize-none"
+                {...field}
+              />
             ) : (
               <Input
                 type={type}
                 placeholder={placeholder}
                 autoComplete="off"
+                className="resize-none"
                 {...field}
               />
             )}

@@ -10,9 +10,16 @@ import {
 import { Form } from "@/components/ui/form";
 import { LoginForm, loginSchema } from "@/validations/auth-validation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { INITIAL_LOGIN_FORM } from "@/constants/auth-constant";
+import {
+  INITIAL_LOGIN_FORM,
+  INITIAL_STATE_LOGIN_FORM,
+} from "@/constants/auth-constant";
 import { Button } from "@/components/ui/button";
 import FormInput from "@/components/common/form-input";
+import { startTransition, useActionState, useEffect } from "react";
+import login from "../actions";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function Login() {
   const form = useForm<LoginForm>({
@@ -20,9 +27,30 @@ export default function Login() {
     defaultValues: INITIAL_LOGIN_FORM,
   });
 
+  const [loginState, loginAction, isPendingLogin] = useActionState(
+    login,
+    INITIAL_STATE_LOGIN_FORM,
+  );
+
   const onSubmit = form.handleSubmit(async () => {
-    console.log("Form submitted successfully");
+    const formData = new FormData();
+    Object.entries(form.getValues()).forEach(([key, value]) => {
+      formData.append(key, value);
+    });
+
+    startTransition(() => {
+      loginAction(formData);
+    });
   });
+
+  useEffect(() => {
+    if (loginState.status === "error") {
+      toast.error("Login failed", {
+        description: loginState.errors?._form?.[0] || "Unknown error",
+      });
+      form.reset();
+    }
+  }, [loginState, form]);
 
   return (
     <Card>
@@ -49,7 +77,9 @@ export default function Login() {
               placeholder="Enter your password"
               type="password"
             />
-            <Button type="submit">Login</Button>
+            <Button type="submit">
+              {isPendingLogin ? <Loader2 className="animate-spin" /> : "Login"}
+            </Button>
           </form>
         </Form>
       </CardContent>
